@@ -1,1 +1,1 @@
-Thái tử cam bu chia Thiên Thiên mặt trời nhỏ
+Thái tử đất Cam Thiên Thiên mặt trời nhỏ
