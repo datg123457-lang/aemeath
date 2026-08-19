@@ -1,1 +1,1 @@
-nah đang chơi game maybe
+Trong đây có 1 thằng gay
