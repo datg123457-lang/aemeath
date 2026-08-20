@@ -3,7 +3,7 @@
 #include <ctime>
 #include <string>
 
-// Lớp Logic Player (Có thể dùng lại OOP thuần của bạn)
+// Lớp Logic Player
 class Player {
 public:
     float x, y, speed;
@@ -23,8 +23,8 @@ public:
     }
 
     void reset() {
-        x = rand() % 760; // Tọa độ X ngẫu nhiên
-        y = 0;           // Rơi từ mép trên màn hình
+        x = static_cast<float>(rand() % 760); // Tọa độ X ngẫu nhiên
+        y = 0.0f;                             // Rơi từ mép trên màn hình
     }
 
     void update() {
@@ -36,29 +36,29 @@ public:
 int main() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-    // 1. Khởi tạo cửa sổ game 2D (800x600 px)
-    sf::RenderWindow window(sf::VideoMode(800, 600), "OOP C++ 2D Game Demo");
+    // 1. Khởi tạo cửa sổ game 2D (800x600 px) - Cú pháp SFML 3.x
+    sf::RenderWindow window(sf::VideoMode({800, 600}), "OOP C++ 2D Game Demo");
     window.setFramerateLimit(60); // Giới hạn 60 FPS
 
     // 2. Khởi tạo đối tượng
-    Player player(375, 520);
+    Player player(375.0f, 520.0f);
     Food food;
     int score = 0;
 
     // 3. Khởi tạo Font và Text để hiển thị điểm
     sf::Font font;
-    // Cần file font .ttf trong thư mục dự án (ví dụ: arial.ttf)
-    bool hasFont = font.loadFromFile("arial.ttf"); 
-    sf::Text scoreText;
+    bool hasFont = font.openFromFile("arial.ttf"); 
+    
+    // Khởi tạo Text truyền trực tiếp Font vào constructor (Chuẩn SFML 3.x)
+    sf::Text scoreText(font);
     if (hasFont) {
-        scoreText.setFont(font);
         scoreText.setCharacterSize(24);
         scoreText.setFillColor(sf::Color::White);
-        scoreText.setPosition(10, 10);
+        scoreText.setPosition({10.0f, 10.0f});
     }
 
     // 4. Tạo hình ảnh đồ họa (Shapes)
-    sf::RectangleShape playerSprite(sf::Vector2f(50.0f, 20.0f)); // Thanh người chơi
+    sf::RectangleShape playerSprite(sf::Vector2f({50.0f, 20.0f})); // Thanh người chơi
     playerSprite.setFillColor(sf::Color::Green);
 
     sf::CircleShape foodSprite(10.0f); // Viên thực phẩm
@@ -67,25 +67,24 @@ int main() {
     // VÒNG LẶP GAME (GAME LOOP)
     while (window.isOpen()) {
         // --- A. Xử lý sự kiện (Input) ---
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+        while (const auto event = window.pollEvent()) {
+            if (event->is<sf::Event::Closed>())
                 window.close();
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && player.x > 0)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) && player.x > 0)
             player.moveLeft();
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && player.x < 750)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) && player.x < 750)
             player.moveRight();
 
         // --- B. Cập nhật logic game ---
         food.update();
 
         // Kiểm tra va chạm (Player ăn Food)
-        sf::FloatRect playerBounds(player.x, player.y, 50, 20);
-        sf::FloatRect foodBounds(food.x, food.y, 20, 20);
+        sf::FloatRect playerBounds({player.x, player.y}, {50.0f, 20.0f});
+        sf::FloatRect foodBounds({food.x, food.y}, {20.0f, 20.0f});
 
-        if (playerBounds.intersects(foodBounds)) {
+        if (playerBounds.findIntersection(foodBounds)) {
             score += 10;
             food.reset();
         }
@@ -95,9 +94,9 @@ int main() {
             scoreText.setString("Score: " + std::to_string(score));
         }
 
-        // Cập nhật vị trí các hình vẽ theo Logic
-        playerSprite.setPosition(player.x, player.y);
-        foodSprite.setPosition(food.x, food.y);
+        // Cập nhật vị trí các hình vẽ theo Logic (Cú pháp SFML 3.x)
+        playerSprite.setPosition({player.x, player.y});
+        foodSprite.setPosition({food.x, food.y});
 
         // --- C. Vẽ mọi thứ lên màn hình (Render) ---
         window.clear(sf::Color(30, 30, 30)); // Màn hình nền xám đen
