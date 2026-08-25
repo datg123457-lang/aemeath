@@ -359,3 +359,268 @@ Enemy Enemy::createDemonLord()
         800
     );
 }
+std::vector<EnemyData> Enemy::getEnemyDatabase()
+{
+    return
+    {
+        // ==========================================
+        // Dark Forest
+        // ==========================================
+
+        {
+            101,
+            "Shadow Wolf",
+            EnemyType::NORMAL,
+            1,
+            "Dark Forest",
+            2,
+            80,
+            15,
+            5,
+            3,
+            15,
+            30,
+            20
+        },
+
+        {
+            102,
+            "Forest Warden",
+            EnemyType::ELITE,
+            1,
+            "Dark Forest",
+            4,
+            180,
+            28,
+            12,
+            8,
+            12,
+            100,
+            60
+        },
+
+        {
+            103,
+            "Elder Treant",
+            EnemyType::BOSS,
+            1,
+            "Dark Forest",
+            5,
+            400,
+            45,
+            20,
+            15,
+            8,
+            250,
+            150
+        },
+
+        // ==========================================
+        // Ancient Ruins
+        // ==========================================
+
+        {
+            201,
+            "Ruins Guardian",
+            EnemyType::NORMAL,
+            2,
+            "Ancient Ruins",
+            7,
+            150,
+            25,
+            15,
+            5,
+            8,
+            50,
+            35
+        },
+
+        {
+            202,
+            "Ancient Golem",
+            EnemyType::ELITE,
+            2,
+            "Ancient Ruins",
+            9,
+            300,
+            42,
+            30,
+            10,
+            4,
+            150,
+            90
+        },
+
+        {
+            203,
+            "Ruins Overlord",
+            EnemyType::BOSS,
+            2,
+            "Ancient Ruins",
+            10,
+            600,
+            60,
+            35,
+            25,
+            10,
+            400,
+            250
+        },
+
+        // ==========================================
+        // Frozen Peak
+        // ==========================================
+
+        {
+            301,
+            "Frost Wolf",
+            EnemyType::NORMAL,
+            3,
+            "Frozen Peak",
+            12,
+            230,
+            38,
+            18,
+            8,
+            20,
+            70,
+            50
+        },
+
+        {
+            302,
+            "Ice Revenant",
+            EnemyType::ELITE,
+            3,
+            "Frozen Peak",
+            14,
+            420,
+            55,
+            28,
+            20,
+            15,
+            200,
+            120
+        },
+
+        {
+            303,
+            "Frost Dragon",
+            EnemyType::BOSS,
+            3,
+            "Frozen Peak",
+            15,
+            850,
+            80,
+            45,
+            40,
+            18,
+            550,
+            350
+        },
+
+        // ==========================================
+        // Shadow Castle
+        // ==========================================
+
+        {
+            401,
+            "Shadow Knight",
+            EnemyType::NORMAL,
+            4,
+            "Shadow Castle",
+            17,
+            350,
+            55,
+            30,
+            15,
+            18,
+            100,
+            70
+        },
+
+        {
+            402,
+            "Dark Paladin",
+            EnemyType::ELITE,
+            4,
+            "Shadow Castle",
+            19,
+            600,
+            75,
+            45,
+            30,
+            20,
+            300,
+            180
+        },
+
+        {
+            403,
+            "Shadow King",
+            EnemyType::BOSS,
+            4,
+            "Shadow Castle",
+            20,
+            1200,
+            110,
+            60,
+            55,
+            25,
+            800,
+            500
+        },
+
+        // ==========================================
+        // Demon Realm
+        // ==========================================
+
+        {
+            501,
+            "Lesser Demon",
+            EnemyType::NORMAL,
+            5,
+            "Demon Realm",
+            22,
+            500,
+            80,
+            40,
+            30,
+            25,
+            150,
+            100
+        },
+
+        {
+            502,
+            "Demon General",
+            EnemyType::ELITE,
+            5,
+            "Demon Realm",
+            24,
+            900,
+            115,
+            65,
+            55,
+            30,
+            450,
+            300
+        },
+
+        {
+            503,
+            "Demon Lord",
+            EnemyType::BOSS,
+            5,
+            "Demon Realm",
+            25,
+            1800,
+            160,
+            85,
+            100,
+            35,
+            1200,
+            800
+        }
+    };
+}
