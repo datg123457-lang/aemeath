@@ -624,3 +624,34 @@ std::vector<EnemyData> Enemy::getEnemyDatabase()
         }
     };
 }
+std::vector<EnemyData> Enemy::getEnemiesByArea(int areaId)
+{
+    std::vector<EnemyData> result;
+
+    for (const EnemyData& enemy : getEnemyDatabase())
+    {
+        if (enemy.areaId == areaId)
+        {
+            result.push_back(enemy);
+        }
+    }
+
+    return result;
+}
+
+std::vector<EnemyData> Enemy::getEnemiesByType(
+    EnemyType type
+)
+{
+    std::vector<EnemyData> result;
+
+    for (const EnemyData& enemy : getEnemyDatabase())
+    {
+        if (enemy.type == type)
+        {
+            result.push_back(enemy);
+        }
+    }
+
+    return result;
+}
