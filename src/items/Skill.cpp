@@ -1,4 +1,4 @@
-#include "core/Skill.h"
+#include "items/Skill.h"
 #include "entities/Character.h"
  
 #include <iostream>
