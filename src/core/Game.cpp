@@ -133,7 +133,7 @@ void Game::initialize()
 
     cout << "\n";
     cout << "=====================================\n";
-    cout << "           AEMEATH RPG\n";
+    cout << "      ELDORIA: THE ORIGIN CRYSTAL\n";
     cout << "=====================================\n";
 
     initializeSystems();
@@ -476,13 +476,22 @@ bool Game::hasPlayer() const
 }
 
 // ==========================================
+// Get Player (bo sung toi thieu cho main.cpp)
+// ==========================================
+
+Character* Game::getPlayer() const
+{
+    return player.get();
+}
+
+// ==========================================
 // Exit Game
 // ==========================================
 
 void Game::exitGame()
 {
     cout << "\n";
-    cout << "Exiting Aemeath...\n";
+    cout << "Exiting Eldoria...\n";
 
     running = false;
 }

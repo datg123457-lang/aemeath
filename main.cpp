@@ -2,7 +2,12 @@
 #include <vector>
 #include <string>
 #include <limits>
+
 #include "core/Game.h"
+#include "core/MapSystem.h"
+#include "core/BattleSystem.h"
+#include "entities/Character.h"
+#include "entities/Enemy.h"
 
 #if defined(_WIN32) || defined(_WIN64)
     #include <conio.h>
@@ -62,9 +67,9 @@
         newt.c_lflag &= ~(ICANON | ECHO);
         tcsetattr(STDIN_FILENO, TCSANOW, &newt);
         ch = getchar();
-        if (ch == 27) { 
+        if (ch == 27) {
             if (std::cin.peek() == '[') {
-                getchar(); 
+                getchar();
                 ch = getchar();
             }
         }
@@ -128,7 +133,7 @@ void pauseScreen() {
 int showMenu(const std::string& subtitle, const std::vector<std::string>& options) {
     int selectedIndex = 0;
     showCursor(false); // Ẩn con trỏ chuột khi duyệt Menu
-    
+
     while (true) {
         clearScreen();
 
@@ -189,6 +194,236 @@ int showMenu(const std::string& subtitle, const std::vector<std::string>& option
     }
 }
 
+// ==========================================
+// Helper: EnemyType -> nhan hien thi
+// ==========================================
+
+std::string enemyTypeLabel(EnemyType type) {
+    switch (type) {
+        case EnemyType::NORMAL: return "Thuong";
+        case EnemyType::ELITE:  return "Tinh Anh";
+        case EnemyType::BOSS:   return "TRUM";
+    }
+    return "";
+}
+
+// ==========================================
+// BATTLE: tao Enemy tu EnemyData va chay BattleSystem hien tai
+// ==========================================
+
+void doBattle(Game& game, const EnemyData& data) {
+    Character* player = game.getPlayer();
+
+    if (player == nullptr) {
+        return;
+    }
+
+    // Tao 1 Enemy moi tren heap tu du lieu trong EnemyData
+    // (khong goi lai cac ham create...() vi Enemy khong the copy/move,
+    //  nhung constructor cong khai cua Enemy thi dung duoc truc tiep).
+    Character* enemyPtr = new Enemy(
+        data.id,
+        data.name,
+        data.type,
+        data.areaId,
+        data.maxHP,
+        data.attack,
+        data.defense,
+        data.intelligence,
+        data.agility,
+        data.experienceReward,
+        data.goldReward
+    );
+
+    std::vector<Character*> enemies;
+    enemies.push_back(enemyPtr);
+
+    clearScreen();
+    showCursor(true);
+
+    std::cout << "\n=====================================\n";
+    std::cout << "        ELDORIA - CHIEN DAU\n";
+    std::cout << "=====================================\n";
+    std::cout << "Ban cham tran voi " << data.name
+               << " [" << enemyTypeLabel(data.type) << "]!\n";
+
+    // Su dung dung BattleSystem hien tai, khong viet lai he thong khac
+    BattleSystem battle(*player, enemies);
+    battle.startBattle();
+
+    if (player->isAlive()) {
+        int totalGold = 0;
+
+        for (Character* e : enemies) {
+            if (e != nullptr && !e->isAlive()) {
+                Enemy* asEnemy = dynamic_cast<Enemy*>(e);
+
+                if (asEnemy != nullptr) {
+                    totalGold += asEnemy->getGoldReward();
+                }
+            }
+        }
+
+        if (totalGold > 0) {
+            player->setGold(player->getGold() + totalGold);
+
+            std::cout << "\n>>> Ban nhan them " << totalGold
+                       << " vang tu chien loi pham! <<<\n";
+        }
+    } else {
+        // Defeat: hoi phuc HP de tro ve tiep tuc hanh trinh
+        // (khong co man Game Over vinh vien theo yeu cau flow)
+        player->setHP(player->getMaxHP());
+
+        std::cout << "\n" << player->getName()
+                   << " duoc dua ve noi an toan va hoi phuc HP.\n";
+    }
+
+    for (Character* e : enemies) {
+        delete e;
+    }
+
+    showCursor(false);
+    pauseScreen();
+}
+
+// ==========================================
+// WORLD MAP: CHOOSE AREA -> CHOOSE ENEMY -> BATTLE
+// ==========================================
+
+void exploreWorld(Game& game) {
+    if (!game.hasPlayer()) {
+        clearScreen();
+        showCursor(true);
+        std::cout << "\nHay tao nhan vat truoc (New Game)!\n";
+        pauseScreen();
+        showCursor(false);
+        return;
+    }
+
+    // Map chi quan ly du lieu khu vuc (khong doi tuong nao thay doi state
+    // cua no), nen dung 1 instance rieng trong main la an toan va khong
+    // can Game phai lo them mot getter moi.
+    Map worldMap;
+
+    bool exploring = true;
+
+    while (exploring) {
+        const std::vector<Area>& areas = worldMap.getAreas();
+
+        std::vector<std::string> areaOptions;
+        for (const Area& area : areas) {
+            areaOptions.push_back(area.name);
+        }
+        areaOptions.push_back("Quay lai Menu chinh");
+
+        int areaChoice = showMenu("CHON KHU VUC KHAM PHA (WORLD MAP)", areaOptions);
+
+        if (areaChoice == -1 || areaChoice == static_cast<int>(areaOptions.size() - 1)) {
+            exploring = false;
+            break;
+        }
+
+        const Area& selectedArea = areas[static_cast<size_t>(areaChoice)];
+        std::vector<EnemyData> enemyList = Enemy::getEnemiesByArea(selectedArea.id);
+
+        bool inArea = true;
+
+        while (inArea) {
+            std::vector<std::string> enemyOptions;
+
+            for (const EnemyData& e : enemyList) {
+                enemyOptions.push_back(
+                    e.name + " [" + enemyTypeLabel(e.type) + "] - Lv." + std::to_string(e.level)
+                );
+            }
+            enemyOptions.push_back("Quay lai World Map");
+
+            int enemyChoice = showMenu(
+                "KHU VUC: " + selectedArea.name + " - CHON QUAI VAT",
+                enemyOptions
+            );
+
+            if (enemyChoice == -1 || enemyChoice == static_cast<int>(enemyOptions.size() - 1)) {
+                inArea = false;
+                break;
+            }
+
+            doBattle(game, enemyList[static_cast<size_t>(enemyChoice)]);
+
+            // Sau tran, hoi nguoi choi co muon kham pha tiep khu vuc nay khong
+            std::vector<std::string> continueOptions = {
+                "Kham pha tiep khu vuc nay",
+                "Quay lai World Map"
+            };
+
+            int cont = showMenu("BAN MUON LAM GI TIEP THEO?", continueOptions);
+
+            if (cont != 0) {
+                inArea = false;
+            }
+        }
+    }
+}
+
+// ==========================================
+// INVENTORY: mo tui do that su cua nhan vat
+// ==========================================
+
+void openInventoryMenu(Game& game) {
+    Character* player = game.getPlayer();
+
+    if (player == nullptr) {
+        clearScreen();
+        showCursor(true);
+        std::cout << "\nHay tao nhan vat truoc (New Game)!\n";
+        pauseScreen();
+        showCursor(false);
+        return;
+    }
+
+    bool open = true;
+
+    while (open) {
+        clearScreen();
+        showCursor(true);
+
+        std::cout << "\n=====================================\n";
+        std::cout << "             TUI DO ELDORIA\n";
+        std::cout << "=====================================\n";
+
+        player->getInventory().showInventory();
+
+        std::cout << "\n1. Su dung / Trang bi vat pham\n";
+        std::cout << "0. Quay lai\n";
+        std::cout << "Lua chon: ";
+
+        int choice = -1;
+        std::cin >> choice;
+
+        if (choice == 1) {
+            int count = player->getInventory().getItemCount();
+
+            if (count == 0) {
+                std::cout << "\nTui do dang trong!\n";
+            } else {
+                std::cout << "Chon vat pham (1-" << count << "): ";
+
+                int idx = 0;
+                std::cin >> idx;
+
+                player->getInventory().useItem(idx - 1, *player);
+            }
+
+            pauseScreen();
+        } else {
+            open = false;
+        }
+    }
+
+    showCursor(false);
+}
+
 int main() {
     setFullscreen();
     showCursor(false);
@@ -199,16 +434,18 @@ int main() {
     std::vector<std::string> mainMenuOptions = {
         "Bắt đầu trò chơi mới (New Game)",
         "Chọn khu vực khám phá (World Map)",
+        "Túi đồ (Inventory)",
+        "Cửa hàng (Shop)",
         "Nhật ký nhiệm vụ (Quest Journal)",
-        "Tải game (Load Game)",
-        "Cài đặt (Settings)",
+        "Lưu trò chơi (Save Game)",
+        "Tải trò chơi (Load Game)",
         "Thoát (Exit)"
     };
 
     bool isRunning = true;
 
     while (isRunning) {
-        int choice = showMenu("MENU CHÍNH TRÒ CHƠI", mainMenuOptions);
+        int choice = showMenu("MENU CHÍNH - ELDORIA: THE ORIGIN CRYSTAL", mainMenuOptions);
 
         switch (choice) {
             case 0: { // New Game
@@ -229,30 +466,71 @@ int main() {
 
                 game.startNewGame(classChoice, name);
 
+                if (game.hasPlayer()) {
+                    std::cout << "\n=====================================\n";
+                    std::cout << "           STARTING AREA\n";
+                    std::cout << "=====================================\n";
+                    std::cout << "Ban tinh day o ria phia Bac cua DARK FOREST,\n";
+                    std::cout << "vung dat dau tien tren hanh trinh tim kiem\n";
+                    std::cout << "The Origin Crystal cua Eldoria...\n";
+                }
+
                 showCursor(false);
                 pauseScreen();
                 break;
             }
 
-            case 1: { // World Map
-                clearScreen();
-                game.showMap();
-                pauseScreen();
+            case 1: { // World Map -> Choose Area -> Choose Enemy -> Battle
+                exploreWorld(game);
                 break;
             }
 
-            case 2: { // Quest Journal
+            case 2: { // Inventory
+                openInventoryMenu(game);
+                break;
+            }
+
+            case 3: { // Shop
+                clearScreen();
+                showCursor(true);
+                if (!game.hasPlayer()) {
+                    std::cout << "\nHay tao nhan vat truoc!\n";
+                    pauseScreen();
+                } else {
+                    game.openShop();
+                    pauseScreen();
+                }
+                showCursor(false);
+                break;
+            }
+
+            case 4: { // Quest Journal
                 clearScreen();
                 if (!game.hasPlayer()) {
                     std::cout << "\nHay tao nhan vat truoc!\n";
+                    pauseScreen();
                 } else {
+                    showCursor(true);
                     game.showQuests();
+                    showCursor(false);
+                }
+                break;
+            }
+
+            case 5: { // Save Game
+                clearScreen();
+                if (!game.hasPlayer()) {
+                    std::cout << "\nHay tao nhan vat truoc!\n";
+                } else if (game.saveGame()) {
+                    std::cout << "\nLuu game thanh cong!\n";
+                } else {
+                    std::cout << "\nKhong the luu game!\n";
                 }
                 pauseScreen();
                 break;
             }
 
-            case 3: { // Load Game
+            case 6: { // Load Game
                 clearScreen();
                 if (!game.hasPlayer()) {
                     std::cout << "\nHay tao nhan vat truoc!\n";
@@ -265,14 +543,7 @@ int main() {
                 break;
             }
 
-            case 4: { // Settings
-                clearScreen();
-                std::cout << "\nSettings chua duoc trien khai.\n";
-                pauseScreen();
-                break;
-            }
-
-            case 5:
+            case 7:
             case -1: { // Exit
                 clearScreen();
                 int w = 120, h = 30;

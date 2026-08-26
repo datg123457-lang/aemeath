@@ -84,6 +84,11 @@ public:
 
     bool hasPlayer() const;
 
+    // Bo sung toi thieu: can thiet de main.cpp lay Character&
+    // de dua vao BattleSystem, InventorySystem, ... khi choi.
+    // Khong pha vo API cu, chi them 1 getter moi.
+    Character* getPlayer() const;
+
     // ==========================================
     // State
     // ==========================================
