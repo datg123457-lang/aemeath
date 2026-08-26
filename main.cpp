@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-
+#include "core/Game.h"
 #if defined(_WIN32) || defined(_WIN64)
     #include <conio.h>
     #include <windows.h>
@@ -76,7 +76,7 @@
 // Mã màu ANSI Escape Code
 #define COLOR_RESET   "\033[0m"
 #define COLOR_TITLE   "\033[1;36m"
-#define COLOR_MENU    "\033[1;33m"
+#define COLOR_MENU_TEXT "\033[1;33m"
 #define COLOR_SELECT  "\033[1;32m"
 #define COLOR_INFO    "\033[0;35m"
 #define COLOR_BORDER  "\033[1;34m"
@@ -145,7 +145,7 @@ int showMenu(const std::string& subtitle, const std::vector<std::string>& option
         // Khung Tiêu Đề
         std::string border(64, '=');
         lines.push_back({border, COLOR_BORDER});
-        lines.push_back({subtitle, COLOR_MENU});
+        lines.push_back({subtitle, COLOR_MENU_TEXT});
         lines.push_back({border, COLOR_BORDER});
         lines.push_back({"", ""});
 
@@ -196,7 +196,8 @@ int main() {
     // 1. Phóng to Fullscreen & Ẩn con trỏ chuột nhấp nháy
     setFullscreen();
     hideCursor();
-
+Game game;
+game.initialize();
     std::vector<std::string> mainMenuOptions = {
         "Bắt đầu trò chơi mới (New Game)",
         "Chọn khu vực khám phá (World Map)",
@@ -208,18 +209,144 @@ int main() {
 
     bool isRunning = true;
 
-    while (isRunning) {
-        int choice = showMenu("MENU CHÍNH TRÒ CHƠI", mainMenuOptions);
+    while (isRunning)
+{
+    int choice = showMenu(
+        "MENU CHÍNH TRÒ CHƠI",
+        mainMenuOptions
+    );
 
-        if (choice == 5 || choice == -1) {
+    switch (choice)
+    {
+        case 0:
+        {
+            // New Game
+
+            int classChoice = showMenu(
+                "CHỌN CLASS NHÂN VẬT",
+                {
+                    "Warrior",
+                    "Mage",
+                    "Archer"
+                }
+            );
+
+            if (classChoice == -1)
+            {
+                break;
+            }
+
             clearScreen();
-            int w = 120, h = 30;
+
+            std::string name;
+
+            std::cout << "\n";
+            std::cout << "Nhap ten nhan vat: ";
+            std::getline(std::cin >> std::ws, name);
+
+            game.startNewGame(classChoice, name);
+
+            std::cout << "\nNhan Enter de tiep tuc...";
+            std::cin.get();
+
+            break;
+        }
+
+        case 1:
+        {
+            // World Map
+            clearScreen();
+
+            game.showMap();
+
+            std::cout << "\nNhan Enter de quay lai...";
+            std::cin.get();
+
+            break;
+        }
+
+        case 2:
+        {
+            // Quest Journal
+            clearScreen();
+
+            if (!game.hasPlayer())
+            {
+                std::cout << "\nHay tao nhan vat truoc!\n";
+                std::cout << "\nNhan Enter de quay lai...";
+                std::cin.get();
+            }
+            else
+            {
+                game.showQuests();
+            }
+
+            break;
+        }
+
+        case 3:
+        {
+            // Load Game
+            clearScreen();
+
+            if (!game.hasPlayer())
+            {
+                std::cout << "\nHay tao nhan vat truoc!\n";
+            }
+            else if (game.loadGame())
+            {
+                std::cout << "\nLoad game thanh cong!\n";
+            }
+            else
+            {
+                std::cout << "\nKhong the load game!\n";
+            }
+
+            std::cout << "\nNhan Enter de quay lai...";
+            std::cin.get();
+
+            break;
+        }
+
+        case 4:
+        {
+            // Settings
+            clearScreen();
+
+            std::cout << "\n";
+            std::cout << "Settings chua duoc trien khai.\n";
+            std::cout << "\nNhan Enter de quay lai...";
+            std::cin.get();
+
+            break;
+        }
+
+        case 5:
+        case -1:
+        {
+            clearScreen();
+
+            int w = 120;
+            int h = 30;
+
             getConsoleSize(w, h);
-            for (int i = 0; i < h / 2; ++i) std::cout << "\n";
-            printCentered("Cảm ơn bạn đã chơi Eldoria: The Origin Crystal!", w, COLOR_TITLE);
+
+            for (int i = 0; i < h / 2; ++i)
+            {
+                std::cout << "\n";
+            }
+
+            printCentered(
+                "Cảm ơn bạn đã chơi Eldoria: The Origin Crystal!",
+                w,
+                COLOR_TITLE
+            );
+
             isRunning = false;
+            break;
         }
     }
+}
 
     return 0;
 }

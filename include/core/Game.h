@@ -2,12 +2,13 @@
 #define GAME_H
 
 #include <memory>
+#include <string>
 
-// Forward declaration
+class Character;
 class BattleSystem;
 class InventorySystem;
 class QuestSystem;
-class MapSystem;
+class Map;
 class SaveSystem;
 class ShopSystem;
 
@@ -22,13 +23,19 @@ private:
     bool initialized;
 
     // ==========================================
+    // Player
+    // ==========================================
+
+    std::unique_ptr<Character> player;
+
+    // ==========================================
     // Game Systems
     // ==========================================
 
     std::unique_ptr<BattleSystem> battleSystem;
     std::unique_ptr<InventorySystem> inventorySystem;
     std::unique_ptr<QuestSystem> questSystem;
-    std::unique_ptr<MapSystem> mapSystem;
+    std::unique_ptr<Map> mapSystem;
     std::unique_ptr<SaveSystem> saveSystem;
     std::unique_ptr<ShopSystem> shopSystem;
 
@@ -40,29 +47,8 @@ private:
     void initializeSystems();
 
     // ==========================================
-    // Game Loop
+    // Exit
     // ==========================================
-
-    void processInput();
-    void update();
-    void render();
-
-    // ==========================================
-    // Menu
-    // ==========================================
-
-    void showMainMenu() const;
-
-    void handleMainMenu();
-
-    void startNewGame();
-    void loadGame();
-    void saveGame();
-
-    void showMap();
-    void openInventory();
-    void showQuests();
-    void openShop();
 
     void exitGame();
 
@@ -81,6 +67,22 @@ public:
     void initialize();
     void run();
     void shutdown();
+
+    // ==========================================
+    // Main Menu Actions
+    // ==========================================
+
+    void startNewGame(int classChoice, const std::string& name);
+
+    bool loadGame();
+    bool saveGame();
+
+    void showMap();
+    void openInventory();
+    void showQuests();
+    void openShop();
+
+    bool hasPlayer() const;
 
     // ==========================================
     // State
