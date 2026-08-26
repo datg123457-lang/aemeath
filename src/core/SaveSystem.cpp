@@ -25,11 +25,19 @@ bool SaveSystem::loadGame(Character& player) {
     std::ifstream inFile(saveFilePath);
     if (inFile.is_open()) {
         int level, experience, gold, hp, maxHP;
-        inFile >> level >> experience >> gold >> hp >> maxHP;
+        
+        // Đọc dữ liệu từ file
+        if (!(inFile >> level >> experience >> gold >> hp >> maxHP)) {
+            inFile.close();
+            return false; // Tránh lỗi nếu file rỗng hoặc hư cấu trúc
+        }
 
+        // Gán trực tiếp lại chỉ số chuẩn cho Player (tránh dùng gainExperience gây lỗi level up trùng)
+        player.setLevel(level);
+        player.setExperience(experience);
         player.setGold(gold);
+        player.setMaxHP(maxHP);
         player.setHP(hp);
-        player.gainExperience(experience);
 
         inFile.close();
         return true;
