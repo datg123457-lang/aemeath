@@ -2,9 +2,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build and Run external CMD",
             "type": "shell",
-            "command": "g++ -std=c++17 -Iinclude main.cpp src/core/*.cpp src/entities/*.cpp src/items/*.cpp src/quests/*.cpp src/utils/*.cpp -o game.exe ; if ($?) { Start-Process cmd -ArgumentList '/k', 'game.exe' }",
+            "label": "Build and Run Game",
+            "command": "g++ -std=c++17 -Iinclude main.cpp src/core/*.cpp src/entities/*.cpp src/items/*.cpp src/quests/*.cpp src/utils/*.cpp -o game.exe -lsfml-graphics -lsfml-window -lsfml-system; if ($?) { .\\game.exe }",
             "group": {
                 "kind": "build",
                 "isDefault": true
