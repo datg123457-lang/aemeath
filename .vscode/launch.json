@@ -1,32 +1,17 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Launch",
-      "type": "lldb",
-      "request": "launch",
-      "program": "${workspaceRoot}/<your program>",
-      "args": [],
-      "cwd": "${workspaceRoot}"
-    },
-    {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
-      "request": "launch",
-      "args": [],
-      "stopAtEntry": false,
-      "externalConsole": true,
-      "cwd": "c:/Users/LENOVO/Downloads/aemeath",
-      "program": "c:/Users/LENOVO/Downloads/aemeath/build/Debug/outDebug",
-      "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
-      "setupCommands": [
+    "version": "0.2.0",
+    "configurations": [
         {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
+            "name": "Run Game (External Console)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/game.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "preLaunchTask": "Build and Run external CMD"
         }
-      ]
-    }
-  ]
+    ]
 }
