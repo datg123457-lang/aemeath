@@ -1,7 +1,7 @@
 #include "core/InventorySystem.h"
 
 #include "entities/Character.h"
-
+#include "items/Potion.h"
 #include <iostream>
 
 using namespace std;
@@ -215,7 +215,10 @@ bool InventorySystem::useItem(
 
     // Gọi hàm use() của Item
     item->use(target);
-
+if (dynamic_cast<Potion*>(item) != nullptr)
+{
+    removeItem(index);
+}
     return true;
 }
 
