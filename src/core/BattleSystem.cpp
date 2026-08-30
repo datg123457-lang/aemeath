@@ -378,12 +378,15 @@ void BattleSystem::startBattle()
     cout << "=====================================\n";
 
     if (player.isAlive())
-    {
-        cout << "\n";
-        cout << ">>> VICTORY! <<<\n";
+{
+    cout << "\n";
+    cout << "=====================================\n";
+    cout << "          CHÚC MỪNG!\n";
+    cout << "      BẠN ĐÃ CHIẾN THẮNG!\n";
+    cout << "=====================================\n";
 
-        rewardPlayer();
-    }
+    rewardPlayer();
+}
     else
     {
         cout << "\n";

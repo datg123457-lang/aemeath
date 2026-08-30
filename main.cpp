@@ -126,7 +126,18 @@ void clearScreen() {
 // Hàm tạm dừng màn hình chờ bấm Enter chuẩn xác
 void pauseScreen() {
     std::cout << "\nNhan Enter de tiep tuc...";
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+#if defined(_WIN32) || defined(_WIN64)
+    // Dung _getch() de cho Enter ma khong bi dong newline con lai
+    // trong std::cin lam man hinh chuyen ngay.
+    while (_getch() != KEY_ENTER) {
+        // Chi chap nhan Enter.
+    }
+#else
+    while (getch() != KEY_ENTER) {
+        // Chi chap nhan Enter.
+    }
+#endif
 }
 
 // Hàm hiển thị Menu tự động căn giữa
@@ -218,10 +229,8 @@ void doBattle(Game& game, const EnemyData& data) {
         return;
     }
 
-    // Tao 1 Enemy moi tren heap tu du lieu trong EnemyData
-    // (khong goi lai cac ham create...() vi Enemy khong the copy/move,
-    //  nhung constructor cong khai cua Enemy thi dung duoc truc tiep).
-    Character* enemyPtr = new Enemy(
+    // Tao Enemy moi tu du lieu cua quai vat.
+    Enemy* enemyPtr = new Enemy(
         data.id,
         data.name,
         data.type,
@@ -245,46 +254,82 @@ void doBattle(Game& game, const EnemyData& data) {
     std::cout << "        ELDORIA - CHIEN DAU\n";
     std::cout << "=====================================\n";
     std::cout << "Ban cham tran voi " << data.name
-               << " [" << enemyTypeLabel(data.type) << "]!\n";
+              << " [" << enemyTypeLabel(data.type) << "]!\n";
 
-    // Su dung dung BattleSystem hien tai, khong viet lai he thong khac
+    // Su dung BattleSystem hien tai.
     BattleSystem battle(*player, enemies);
     battle.startBattle();
 
-    if (player->isAlive()) {
-        int totalGold = 0;
+    // --------------------------------------------------
+    // KET THUC 1 VAN DAU NHO
+    // Chi hien CHUC MUNG khi enemy da bi ha.
+    // --------------------------------------------------
+    if (player->isAlive() && !enemyPtr->isAlive()) {
+        int totalGold = enemyPtr->getGoldReward();
+        player->setGold(player->getGold() + totalGold);
 
-        for (Character* e : enemies) {
-            if (e != nullptr && !e->isAlive()) {
-                Enemy* asEnemy = dynamic_cast<Enemy*>(e);
+        clearScreen();
+        showCursor(true);
 
-                if (asEnemy != nullptr) {
-                    totalGold += asEnemy->getGoldReward();
-                }
-            }
+        int consoleWidth = 120;
+        int consoleHeight = 30;
+        getConsoleSize(consoleWidth, consoleHeight);
+
+        std::vector<std::pair<std::string, std::string>> victoryLines = {
+            {"", ""},
+            {"       =============================================================", COLOR_BORDER},
+            {"", ""},
+            {"        CHÚC MỪNG!", COLOR_TITLE},
+            {"", ""},
+            {"    BẠN ĐÃ CHIẾN THẮNG!", COLOR_SELECT},
+            {"", ""},
+            {"       =============================================================", COLOR_BORDER},
+            {"", ""},
+            {"       Bạn đã đánh bại " + data.name + "!", COLOR_MENU_TEXT},
+            {"", ""},
+            {"       EXP và phần thưởng đã được nhận.", COLOR_INFO},
+            {"       Vàng nhận được: " + std::to_string(totalGold), COLOR_INFO},
+            {"", ""},
+            {"          Nhấn ENTER để tiếp tục...", COLOR_INFO},
+            {"", ""}
+        };
+
+        int topPadding =
+            (consoleHeight - static_cast<int>(victoryLines.size())) / 2;
+
+        if (topPadding < 0) {
+            topPadding = 0;
         }
 
-        if (totalGold > 0) {
-            player->setGold(player->getGold() + totalGold);
-
-            std::cout << "\n>>> Ban nhan them " << totalGold
-                       << " vang tu chien loi pham! <<<\n";
+        for (int i = 0; i < topPadding; ++i) {
+            std::cout << "\n";
         }
-    } else {
-        // Defeat: hoi phuc HP de tro ve tiep tuc hanh trinh
-        // (khong co man Game Over vinh vien theo yeu cau flow)
+
+        for (const auto& line : victoryLines) {
+            printCentered(line.first, consoleWidth, line.second);
+        }
+
+        // QUAN TRONG: cho nguoi choi bam Enter truoc khi quay ve menu.
+        pauseScreen();
+    }
+    else if (!player->isAlive()) {
+        // Thua tran: hoi phuc HP de tiep tuc hanh trinh.
         player->setHP(player->getMaxHP());
 
-        std::cout << "\n" << player->getName()
-                   << " duoc dua ve noi an toan va hoi phuc HP.\n";
+        clearScreen();
+        showCursor(true);
+
+        std::cout << "\n=====================================\n";
+        std::cout << "              DEFEAT\n";
+        std::cout << "=====================================\n";
+        std::cout << player->getName()
+                  << " da that bai va duoc dua ve noi an toan.\n";
+
+        pauseScreen();
     }
 
-    for (Character* e : enemies) {
-        delete e;
-    }
-
+    delete enemyPtr;
     showCursor(false);
-    pauseScreen();
 }
 
 // ==========================================
