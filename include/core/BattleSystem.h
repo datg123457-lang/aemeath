@@ -14,6 +14,8 @@ private:
     bool playerDefending;
 
 private:
+    void clearScreen();
+
     void showBattleStatus() const;
     void showActions() const;
 

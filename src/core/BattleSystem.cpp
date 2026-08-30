@@ -6,7 +6,14 @@
 #include <ctime>
 
 using namespace std;
-
+void BattleSystem::clearScreen()
+{
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
 // ==========================================
 // Constructor
 // ==========================================
@@ -329,18 +336,19 @@ void BattleSystem::startBattle()
          << " enters the battle!\n";
 
     while (player.isAlive() && areEnemiesAlive())
-    {
-        cout << "\n\n";
-        cout << "#####################################\n";
-        cout << "              TURN "
-             << currentTurn
-             << "\n";
-        cout << "#####################################\n";
+{
+    clearScreen();
 
-        showBattleStatus();
+    cout << "#####################################\n";
+    cout << "              TURN "
+         << currentTurn
+         << "\n";
+    cout << "#####################################\n";
 
-        // Player turn
-        playerTurn();
+    showBattleStatus();
+
+    // Player turn
+    playerTurn();
 
         // Kiểm tra enemy chết hết chưa
         if (!areEnemiesAlive())
