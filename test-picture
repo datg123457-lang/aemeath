@@ -1,0 +1,23 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#include <iostream>
+
+int main() {
+    int width, height, channels;
+    
+    // Đọc file ảnh (trả về mảng các pixel dạng byte)
+    unsigned char *img = stbi_load("image.jpg", &width, &height, &channels, 0);
+    
+    if (img == NULL) {
+        std::cout << "Loi: Khong the doc file anh!\n";
+        return 1;
+    }
+
+    std::cout << "Doc anh thanh cong!\n";
+    std::cout << "Kich thuoc: " << width << "x" << height << "\n";
+    std::cout << "So kenh mau (Channels): " << channels << "\n"; // 3: RGB, 4: RGBA
+
+    // Giải phóng bộ nhớ sau khi dùng xong
+    stbi_image_free(img);
+    return 0;
+}
