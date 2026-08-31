@@ -248,14 +248,30 @@ void doBattle(Game& game, const EnemyData& data) {
     enemies.push_back(enemyPtr);
 
     clearScreen();
-    showCursor(true);
+showCursor(true);
 
-    std::cout << "\n=====================================\n";
-    std::cout << "        ELDORIA - CHIEN DAU\n";
-    std::cout << "=====================================\n";
-    std::cout << "Ban cham tran voi " << data.name
-              << " [" << enemyTypeLabel(data.type) << "]!\n";
+int consoleWidth = 120;
+int consoleHeight = 30;
+getConsoleSize(consoleWidth, consoleHeight);
 
+std::string battleBorder(72, '=');
+
+std::cout << "\n";
+
+printCentered(battleBorder, consoleWidth, COLOR_BORDER);
+printCentered("ELDORIA - CHIEN DAU", consoleWidth, COLOR_TITLE);
+printCentered(battleBorder, consoleWidth, COLOR_BORDER);
+
+std::cout << "\n";
+
+printCentered(
+    "Ban cham tran voi " + data.name +
+    " [" + enemyTypeLabel(data.type) + "]!",
+    consoleWidth,
+    COLOR_MENU_TEXT
+);
+
+std::cout << "\n";
     // Su dung BattleSystem hien tai.
     BattleSystem battle(*player, enemies);
     battle.startBattle();
@@ -433,12 +449,21 @@ void openInventoryMenu(Game& game) {
         clearScreen();
         showCursor(true);
 
-        std::cout << "\n=====================================\n";
-        std::cout << "             TUI DO ELDORIA\n";
-        std::cout << "=====================================\n";
+       int consoleWidth = 120;
+int consoleHeight = 30;
+getConsoleSize(consoleWidth, consoleHeight);
 
-        player->getInventory().showInventory();
+std::string border(72, '=');
 
+std::cout << "\n";
+
+printCentered(border, consoleWidth, COLOR_BORDER);
+printCentered("TUI DO ELDORIA", consoleWidth, COLOR_TITLE);
+printCentered(border, consoleWidth, COLOR_BORDER);
+
+std::cout << "\n";
+
+player->getInventory().showInventory();
         std::cout << "\n1. Su dung / Trang bi vat pham\n";
         std::cout << "0. Quay lai\n";
         std::cout << "Lua chon: ";
